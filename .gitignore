@@ -1,6 +1,9 @@
 # Env file with tokens
 .env
 
+# pycache, that shit's disgusting, keep it to yourself
+__pycache__/
+
 # Vim swapfiles
 *.swp
 *.swo
