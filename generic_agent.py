@@ -124,11 +124,11 @@ class GenericAgent:
 def _make_request(url: str):
         logger.info(f"Making request to {url}")
         try:
-                response = httpx.Client().get(url, headers=inputs.headers, timeout=50.0)
+                response = httpx.Client().get(url, headers=inputs.headers, timeout=5.0)
                 response.raise_for_status()
                 return response.json()
-        except Exception:
-                logger.info("Request failed")
+        except Exception as e:
+                logger.info(f"Request failed because {e}")
                 return None
 
 
