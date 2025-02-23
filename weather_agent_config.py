@@ -1,4 +1,5 @@
 from generic_agent_inputs import GenericAgentInputs
+import json
 
 def get_weather_agent():
         res = GenericAgentInputs()

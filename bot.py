@@ -5,7 +5,8 @@ import logging
 from discord.ext import commands
 from dotenv import load_dotenv
 # from agent import MistralAgent
-from generic_agent import GenericAgent
+# from generic_agent import GenericAgent
+from ollama_generic_agent import GenericAgent
 
 PREFIX = "!"
 
@@ -58,10 +59,11 @@ async def on_message(message: discord.Message):
     logger.info(f"Processing message from {message.author}: {message.content}")
     response = await agent.run(message)
 
-    if response is None:
-        await message.reply("Agent failed")
-    else:
-        # Send the response back to the channel
+    # if response is None:
+        # await message.reply("Agent failed")
+    # else:
+    # Send the response back to the channel
+    if response is not None:
         await message.reply(response)
 
 

@@ -2,7 +2,7 @@ name: discord_bot
 channels:
   - defaults
 dependencies:
-  - python>=3.13
+  - python>=3.11
   - pip
   - pip:
     - audioop-lts>=0.2.1
@@ -10,3 +10,4 @@ dependencies:
     - mistralai>=1.4.0
     - python-dotenv>=1.0.1
     - jinja2
+    - ollama
