@@ -9,8 +9,8 @@ import json
 import logging
 import discord
 import httpx
-from dataclasses import dataclass
 from jinja2 import Environment
+from weather_agent_config import get_weather_agent
 
 from mistralai import Mistral
 
@@ -19,63 +19,7 @@ MISTRAL_MODEL = "mistral-large-latest"
 
 jenv = Environment()
 
-@dataclass
-class GenericAgentInputs:
-        name                : str = None
-        extract_args_prompt : str = None
-        extracted_arg_name  : str = None
-        tools_prompt        : str = None
-        tool_api_base       : str = None
-        tool_description    : dict= None # json
-        request_fstring     : str = None
-        request_headers     : dict= None # json
-
-inputs = GenericAgentInputs()
-inputs.name = "seven_day_forecast"
-inputs.extract_args_prompt = """
-        Is this message explicitly requesting weather information for a specific city/location?
-        If not, return {"location": "none"}.
-
-        Otherwise, return the full name of the city in JSON format.
-
-        Example:
-        Message: What's the weather in sf?
-        Response: {"location": "San Francisco, CA"}
-
-        Message: What's the temperature in nyc?
-        Response: {"location": "New York City, NY"}
-
-        Message: Is it raining in sf?
-        Response: {"location": "San Francisco, CA"}
-
-        Message: I love the weather in SF
-        Response: {"location": "none"}
-        """
-inputs.extracted_arg_name = "location"
-inputs.tools_prompt = """
-        You are a helpful weather assistant.
-        Given a location and a user's request, use your tools to fulfill the request.
-        Only use tools if needed. If you use a tool, make sure the longitude is correctly negative or positive
-        Provide a short, concise answer that uses emojis.
-        """
-inputs.tool_api_base = "https://api.open-meteo.com/v1/forecast?current=temperature_2m,precipitation,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America%2FLos_Angeles"
-inputs.tool_description = {
-        "type": "function",
-        "function": {
-                "name": "seven_day_forecast",
-                "description": "Get the seven day forecast for a given location with latitude and longitude.",
-                "parameters": {
-                        "type": "object",
-                        "properties": {
-                                "latitude": {"type": "string"},
-                                "longitude": {"type": "string"},
-                        },
-                        "required": ["latitude", "longitude"],
-                },
-        },
-        }
-inputs.request_fstring = "{api_base}&latitude={latitude}&longitude={longitude}"
-inputs.request_headers = {"User-Agent": "weather-app/1.0", "Accept": "application/geo+json"}
+inputs = get_weather_agent()
 
 class GenericAgent:
         def __init__(self):
@@ -178,14 +122,17 @@ class GenericAgent:
 
 
 def _make_request(url: str):
+        logger.info(f"Making request to {url}")
         try:
-                response = httpx.Client().get(url, headers=inputs.headers, timeout=5.0)
+                response = httpx.Client().get(url, headers=inputs.headers, timeout=50.0)
                 response.raise_for_status()
                 return response.json()
         except Exception:
+                logger.info("Request failed")
                 return None
 
 
+# TODO (rdubi): this is bad
 def use_tool_and_clean_results(latitude : str, longitude : str):
         logger.info("Using tool and cleaning results")
         url = jenv.from_string(inputs.request_fstring).render({
@@ -195,26 +142,9 @@ def use_tool_and_clean_results(latitude : str, longitude : str):
         })
 
         data = _make_request(url)
+        logger.info(f"Data: {data}")
 
         if data is None:
                 return "Error fetching data"
 
-
-        res_json = {
-                "current": data["current"],
-                "daily": {},
-        }
-
-        for i, time in enumerate(data["daily"]["time"]):
-                max_temp = data["daily"]["temperature_2m_max"][i]
-                min_temp = data["daily"]["temperature_2m_min"][i]
-                precipitation = data["daily"]["precipitation_probability_max"][i]
-                res_json["daily"][time] = {
-                        "weather_code": data["daily"]["weather_code"][i],
-                        "temperature_max": f"{max_temp}°F",
-                        "temperature_min": f"{min_temp}°F",
-                        "precipitation": f"{precipitation}%",
-                }
-
-        return json.dumps(res_json)
-
+        return inputs.process_results(data)
