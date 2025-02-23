@@ -85,7 +85,7 @@ class GenericAgent:
                 logger.info(f"Function name is {function_name}")
 
                 # function_params = json.loads(tool_call.function.arguments)
-                function_result = self.tools_to_functions[function_name](**tool_call.function.arguments)
+                function_result = self.tools_to_functions[function_name](tool_call.function.arguments)
 
                 # Append the tool call and its result to the messages.
                 messages.append(
@@ -135,13 +135,11 @@ def _make_request(url: str):
                 return None
 
 
-# TODO (rdubi): this is bad
-def use_tool_and_clean_results(latitude : str, longitude : str):
+def use_tool_and_clean_results(arguments : dict):
         logger.info("Using tool and cleaning results")
         url = jenv.from_string(inputs.request_fstring).render({
                 "api_base" : inputs.tool_api_base,
-                "latitude" : latitude,
-                "longitude" : longitude
+                **arguments
         })
 
         data = _make_request(url)
