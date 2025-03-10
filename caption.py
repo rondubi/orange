@@ -1,9 +1,9 @@
 import asyncio
 from io import BytesIO
 from typing import Literal
+
 import aiohttp
 from PIL import Image, ImageDraw, ImageFont
-
 
 ALLOWED_FORMATS = {"png", "jpeg", "jpg"}
 
@@ -52,23 +52,42 @@ def _determine_formats_by_content_type(content_type: str) -> list[str]:
 
 
 def _process(
-    content_type: str,
-    image_bytes: bytes,
+    img: Image.Image,
     bottom_text: str | None = None,
     top_text: str | None = None,
     result_format: Literal["png", "jpg"] = "png",
 ) -> bytes:
-    formats = _determine_formats_by_content_type(content_type)
-
-    io = BytesIO(image_bytes)
-    img = Image.open(io, formats=formats)
-
     _caption(img, bottom_text=bottom_text, top_text=top_text)
 
     result = BytesIO()
     img.save(result, format=result_format)
 
     return result.getbuffer()
+
+
+async def _fetch_image(url: str) -> Image.Image:
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            content_type = response.content_type
+            bytes = await response.read()
+
+    def _load(image_bytes, content_type) -> Image.Image:
+        formats = _determine_formats_by_content_type(content_type)
+
+        io = BytesIO(image_bytes)
+        return Image.open(io, formats=formats)
+
+    return await asyncio.to_thread(_load, bytes, content_type)
+
+
+async def _get_url(url: str) -> Image.Image:
+    if url.startswith("file://"):
+        return await asyncio.to_thread(Image.open, url.removeprefix("file://"))
+    elif url.startswith("http://"):
+        return await _fetch_image(url.removeprefix("http://"))
+    elif url.startswith("https://"):
+        return await _fetch_image(url.removeprefix("https://"))
+    raise ValueError("Unsupported URL")
 
 
 async def caption_template(
@@ -81,15 +100,11 @@ async def caption_template(
     Add a caption to a template given by the provided url and
     returns the captioned image bytes.
     """
-    async with aiohttp.ClientSession() as session:
-        async with session.get(template_url) as response:
-            content_type = response.content_type
-            bytes = await response.read()
+    image = await _get_url(template_url)
 
     return await asyncio.to_thread(
         _process,
-        content_type,
-        bytes,
+        image,
         bottom_text=bottom_text,
         top_text=top_text,
         result_format=result_format,
