@@ -25,6 +25,8 @@ agent = MistralAgent()
 
 # Get the token from the environment variables
 token = os.getenv("DISCORD_TOKEN")
+if token is None:
+    raise ValueError("No discord token found")
 
 
 @bot.event
