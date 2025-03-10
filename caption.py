@@ -83,10 +83,8 @@ async def _fetch_image(url: str) -> Image.Image:
 async def _get_url(url: str) -> Image.Image:
     if url.startswith("file://"):
         return await asyncio.to_thread(Image.open, url.removeprefix("file://"))
-    elif url.startswith("http://"):
+    elif url.startswith("http"):
         return await _fetch_image(url.removeprefix("http://"))
-    elif url.startswith("https://"):
-        return await _fetch_image(url.removeprefix("https://"))
     raise ValueError("Unsupported URL")
 
 
