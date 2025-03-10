@@ -1,0 +1,5 @@
+discord.py
+requests
+numpy
+python-dotenv
+praw

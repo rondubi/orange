@@ -1,6 +1,9 @@
 # Env file with tokens
 .env
 
+# Local meme cache
+meme_cache
+
 # pycache, that shit's disgusting, keep it to yourself
 __pycache__/
 
