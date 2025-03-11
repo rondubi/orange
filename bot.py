@@ -59,9 +59,17 @@ async def on_message(message: discord.Message):
     logger.info(f"Processing message from {message.author}: {message.content}")
     response = await agent.run(message)
 
-    # Send the response back to the channel
-    await message.reply(response)
+    if response is None:
+            return
 
+    # Send the response back to the channel
+    file = discord.File(response, filename = os.path.basename(response))
+    embed = discord.Embed()
+    embed.set_image(url = f"attachment://{os.path.basename(response)}")
+    await message.reply(file = file, embed = embed)
+
+    # Clean up file
+    os.remove(response)
 
 # Commands
 

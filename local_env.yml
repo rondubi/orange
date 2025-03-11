@@ -5,7 +5,12 @@ dependencies:
   - python>=3.13
   - pip
   - pip:
+    - aiohttp>=3.11.13
     - audioop-lts>=0.2.1
     - discord-py>=2.4.0
     - mistralai>=1.4.0
+    - numpy>=2.2.3
+    - pillow>=11.1.0
+    - praw>=7.8.1
     - python-dotenv>=1.0.1
+    - requests>=2.32.3
