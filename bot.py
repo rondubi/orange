@@ -68,6 +68,8 @@ async def on_message(message: discord.Message):
     embed.set_image(url = f"attachment://{os.path.basename(response)}")
     await message.reply(file = file, embed = embed)
 
+    # Clean up file
+    os.remove(response)
 
 # Commands
 

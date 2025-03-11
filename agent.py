@@ -64,6 +64,15 @@ class MistralAgent:
             messages=messages,
         )
 
+        # TODO @ Ramya: instead of having the next several lines manually do template search,
+        # provide the LLM access to the functions Matthew has provided in meme_grabber.py
+        #
+        # It should then return
+        # {"template" : [some url here], "top" : [top caption], "bottom", [bottom caption]}
+        #
+        # Once that is done, you should be able to get rid of everything before the image
+        # construction (aside from a bit of error handling)
+
         logger.info(f"Response is {response}")
         extracted_args = response.choices[0].message.content
         logger.info(f"Extracted arguments {extracted_args}")
