@@ -3,3 +3,8 @@ requests
 numpy
 python-dotenv
 praw
+logging
+os
+random
+pillow
+io

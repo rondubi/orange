@@ -4,14 +4,14 @@ from typing import Literal
 
 import aiohttp
 from PIL import Image, ImageDraw, ImageFont
+from typing import Optional
 
 ALLOWED_FORMATS = {"png", "jpeg", "jpg"}
 
-
 def _caption(
     img: Image.Image,
-    bottom_text: str | None = None,
-    top_text: str | None = None,
+    bottom_text: Optional[str] = None,
+    top_text: Optional[str] = None
 ):
     width, height = img.size
     draw = ImageDraw.ImageDraw(img)
@@ -53,8 +53,8 @@ def _determine_formats_by_content_type(content_type: str) -> list[str]:
 
 def _process(
     img: Image.Image,
-    bottom_text: str | None = None,
-    top_text: str | None = None,
+    bottom_text: Optional[str] = None,
+    top_text: Optional[str] = None,
     result_format: Literal["png", "jpg"] = "png",
 ) -> bytes:
     _caption(img, bottom_text=bottom_text, top_text=top_text)
@@ -81,8 +81,8 @@ async def _fetch_image(url: str) -> Image.Image:
 
 
 async def _get_url(url: str) -> Image.Image:
-    if url.startswith("file://"):
-        return await asyncio.to_thread(Image.open, url.removeprefix("file://"))
+    if url.startswith("/"):
+        return await asyncio.to_thread(Image.open, url)
     elif url.startswith("http"):
         return await _fetch_image(url.removeprefix("http://"))
     raise ValueError("Unsupported URL")
@@ -90,8 +90,8 @@ async def _get_url(url: str) -> Image.Image:
 
 async def caption_template(
     template_url: str,
-    bottom_text: str | None = None,
-    top_text: str | None = None,
+    bottom_text: Optional[str] = None,
+    top_text: Optional[str] = None,
     result_format: Literal["png", "jpg"] = "png",
 ) -> bytes:
     """

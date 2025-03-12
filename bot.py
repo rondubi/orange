@@ -22,12 +22,10 @@ bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 # Import the Mistral agent from the agent.py file
 agent = MistralAgent()
 
-
 # Get the token from the environment variables
 token = os.getenv("DISCORD_TOKEN")
 if token is None:
     raise ValueError("No discord token found")
-
 
 @bot.event
 async def on_ready():
@@ -38,7 +36,6 @@ async def on_ready():
     https://discordpy.readthedocs.io/en/latest/api.html#discord.on_ready
     """
     logger.info(f"{bot.user} has connected to Discord!")
-
 
 @bot.event
 async def on_message(message: discord.Message):
@@ -73,7 +70,6 @@ async def on_message(message: discord.Message):
 
 # Commands
 
-
 # This example command is here to show you how to add commands to the bot.
 # Run !ping with any number of arguments to see the command in action.
 # Feel free to delete this if your project will not need commands.
@@ -83,7 +79,6 @@ async def ping(ctx, *, arg=None):
         await ctx.send("Pong!")
     else:
         await ctx.send(f"Pong! Your argument was {arg}")
-
 
 # Start the bot, connecting it to the gateway
 bot.run(token)

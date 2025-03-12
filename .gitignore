@@ -10,3 +10,7 @@ __pycache__/
 # Vim swapfiles
 *.swp
 *.swo
+
+# virtual env
+venv
+.venv
