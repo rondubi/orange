@@ -105,7 +105,7 @@ class MistralAgent:
         urls = grabber.get_template(
             source = extracted_dict["source"],
             query = extracted_dict["template"],
-            limit = 1
+            limit = 10
         )
 
         logger.info(f"Urls are {urls}")
@@ -118,7 +118,7 @@ class MistralAgent:
             image_bytes = await caption_template("./" + urls["local_path"], extracted_dict["bottom"], \
                 extracted_dict["top"], "png")
         else:
-            image_bytes = await caption_template(urls["templates"][0]["url"], \
+            image_bytes = await caption_template(urls["templates"][0 if len(urls["templates"]) < 3 else random.randint(0,2)]["url"], \
                 extracted_dict["bottom"], extracted_dict["top"], "png")
         
         output_path = f"{random.getrandbits(24)}.png"

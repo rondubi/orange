@@ -199,14 +199,14 @@ class RedditMemeGrabber(MemeGrabberBase):
 
     def fetch_reddit_memes(self, limit: int = 100, time_filter: str = 'all') -> List[Dict]:
         """
-        Fetch memes from Reddit.
+        Fetch memes with "template" flair from Reddit.
 
         Args:
             limit: Maximum number of submissions to fetch
             time_filter: 'hour', 'day', 'week', 'month', 'year', or 'all'
 
         Returns:
-            List of meme dictionaries
+            List of meme dictionaries with "template" flair
         """
         if not self.reddit:
             self.logger.error("Reddit API credentials not provided")
@@ -218,6 +218,10 @@ class RedditMemeGrabber(MemeGrabberBase):
 
             results = []
             for submission in submissions:
+                # Skip posts without "template" flair
+                if not hasattr(submission, 'link_flair_text') or submission.link_flair_text != "template":
+                    continue
+
                 # Skip non-image posts
                 image_url = self._extract_image_url(submission)
                 if not image_url:
@@ -237,7 +241,8 @@ class RedditMemeGrabber(MemeGrabberBase):
                     'upvotes': score,
                     'permalink': f"https://reddit.com{submission.permalink}",
                     'created_utc': submission.created_utc,
-                    'source': 'reddit'
+                    'source': 'reddit',
+                    'flair': submission.link_flair_text
                 }
 
                 results.append(meme_data)
