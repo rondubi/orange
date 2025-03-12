@@ -36,6 +36,8 @@ Otherwise, return an empty dict like {}.
 
 If there are not indications on trying to create a meme, return an empty dict like {}.
 
+The available local reaction folders are: Angry - Wicked, No - Stop - Police, and WTF
+
 Example:
 Message: Make a condescending Wonka meme captioned 'tell me more about your GPT wrapper startup'
 Response: {"source" : "imgflip", "template": "condescending wonka", "top" : "Tell me more", "bottom" : "about your GPT wrapper startup"}

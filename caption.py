@@ -15,7 +15,7 @@ def _caption(
 ):
     width, height = img.size
     draw = ImageDraw.ImageDraw(img)
-    font_size = height / 10
+    font_size = height / 12
     if top_text is not None:
         font = ImageFont.truetype("Impact.ttf", font_size)
         draw.multiline_text(
