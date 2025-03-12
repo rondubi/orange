@@ -22,10 +22,27 @@ bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 # Import the Mistral agent from the agent.py file
 agent = MistralAgent()
 
+# Initialize as None first
+last_channel = None
+
 # Get the token from the environment variables
 token = os.getenv("DISCORD_TOKEN")
 if token is None:
     raise ValueError("No discord token found")
+
+STARTING_PROMPT = """
+🎉 WELCOME TO MEME BOT! 🎉
+
+🟢 Meme Bot is now online and ready to create memes!
+"""
+
+DISCONNECT_PROMPT = """
+🔴 Meme Bot is going offline. See you later!
+"""
+
+INSUFFICIENT_MESSAGE = """
+🟡 I'm assuming you didn't want to create a meme here, but if you did, please indicate so!
+"""
 
 @bot.event
 async def on_ready():
@@ -35,7 +52,16 @@ async def on_ready():
 
     https://discordpy.readthedocs.io/en/latest/api.html#discord.on_ready
     """
+    global last_channel
     logger.info(f"{bot.user} has connected to Discord!")
+    
+    # Find the "orange" channel in any of the guilds the bot is in
+    for guild in bot.guilds:
+        channel = discord.utils.get(guild.text_channels, name='orange')
+        if channel:
+            last_channel = channel
+            await last_channel.send(STARTING_PROMPT)
+            break
 
 @bot.event
 async def on_message(message: discord.Message):
@@ -44,6 +70,9 @@ async def on_message(message: discord.Message):
 
     https://discordpy.readthedocs.io/en/latest/api.html#discord.on_message
     """
+    global last_channel
+    last_channel = message.channel  # Update the active channel
+    
     # Don't delete this line! It's necessary for the bot to process commands.
     await bot.process_commands(message)
 
@@ -56,8 +85,12 @@ async def on_message(message: discord.Message):
     logger.info(f"Processing message from {message.author}: {message.content}")
     response = await agent.run(message)
 
+    if response == "INSUFFICIENT_MESSAGE":
+        await message.reply(INSUFFICIENT_MESSAGE)
+        return
+
     if response is None:
-            return
+        return
 
     # Send the response back to the channel
     file = discord.File(response, filename = os.path.basename(response))
@@ -69,6 +102,24 @@ async def on_message(message: discord.Message):
     os.remove(response)
 
 # Commands
+
+@bot.event
+async def on_disconnect():
+    """Called when the bot disconnects from Discord"""
+    if last_channel:
+        try:
+            await last_channel.send(DISCONNECT_PROMPT)
+        except:
+            pass
+
+@bot.event
+async def insufficient_message():
+    """Called when the user provides an insufficient message from Discord"""
+    if last_channel:
+        try:
+            await last_channel.send(INSUFFICIENT_MESSAGE)
+        except:
+            pass
 
 # This example command is here to show you how to add commands to the bot.
 # Run !ping with any number of arguments to see the command in action.

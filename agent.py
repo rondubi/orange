@@ -34,6 +34,8 @@ and make sure that if combined they still read as a normal sentence.
 
 Otherwise, return an empty dict like {}.
 
+If there are not indications on trying to create a meme, return an empty dict like {}.
+
 Example:
 Message: Make a condescending Wonka meme captioned 'tell me more about your GPT wrapper startup'
 Response: {"source" : "imgflip", "template": "condescending wonka", "top" : "Tell me more", "bottom" : "about your GPT wrapper startup"}
@@ -51,6 +53,9 @@ Message: Make a meme of marvel character saying "when they tell me the project i
 Response: {"source" : "reddit", "template": "marvel character", "top": "when they tell me the project isn't", "bottom": "in C"}
 
 Message: I like memes
+Response: {}
+
+Message: just trying new things
 Response: {}
 """
 
@@ -86,14 +91,15 @@ class MistralAgent:
 
         # {"source": [either imgflip, reddit, reaction], "template" : [some url here], 
         #             "top" : [top caption], "bottom", [bottom caption]}
-        
+
         extracted_dict = \
                 eval(extracted_args[extracted_args.find('{') : extracted_args.rfind('}') + 1])
             
         logger.info(f"Extracted dict {extracted_dict}")
+        
         # Not a query for a meme
         if (not extracted_dict):
-            return None
+            return "INSUFFICIENT_MESSAGE"
 
         # Call function to get template url
         urls = grabber.get_template(
@@ -105,7 +111,7 @@ class MistralAgent:
         logger.info(f"Urls are {urls}")
 
         if (not urls["success"]):
-                return None
+            return "INSUFFICIENT_MESSAGE"
 
         # Call function to caption
         if (extracted_dict["source"] == "reaction"):
@@ -121,4 +127,3 @@ class MistralAgent:
 
         # return image filename
         return output_path
-
