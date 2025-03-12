@@ -81,7 +81,7 @@ async def _fetch_image(url: str) -> Image.Image:
 
 
 async def _get_url(url: str) -> Image.Image:
-    if url.startswith("/"):
+    if url.startswith("/") or url.startswith("./"):
         return await asyncio.to_thread(Image.open, url)
     elif url.startswith("http"):
         return await _fetch_image(url.removeprefix("http://"))

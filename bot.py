@@ -80,13 +80,17 @@ async def on_message(message: discord.Message):
     if message.author.bot or message.content.startswith("!"):
         return
 
+    # Ignore messages without the word "meme" to avoid hitting the Mistral rate limit
+    if "meme" not in message.content.lower() and "reaction" not in message.content.lower():
+        return
+
     # Process the message with the agent you wrote
     # Open up the agent.py file to customize the agent
     logger.info(f"Processing message from {message.author}: {message.content}")
     response = await agent.run(message)
 
     if response == "INSUFFICIENT_MESSAGE":
-        await message.reply(INSUFFICIENT_MESSAGE)
+        # await message.reply(INSUFFICIENT_MESSAGE)
         return
 
     if response is None:
@@ -103,6 +107,7 @@ async def on_message(message: discord.Message):
 
 # Commands
 
+'''
 @bot.event
 async def on_disconnect():
     """Called when the bot disconnects from Discord"""
@@ -111,6 +116,7 @@ async def on_disconnect():
             await last_channel.send(DISCONNECT_PROMPT)
         except:
             pass
+'''
 
 @bot.event
 async def insufficient_message():

@@ -60,8 +60,8 @@ Response: {}
 """
 
 grabber = MemeGrabber(
-    reddit_client_id=os.getenv("YOUR_REDDIT_CLIENT_ID"),
-    reddit_client_secret=os.getenv("YOUR_REDDIT_CLIENT_SECRET"),
+    reddit_client_id=os.getenv("REDDIT_CLIENT_ID"),
+    reddit_client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
     reddit_user_agent=os.getenv("REDDIT_USER_AGENT"),
     local_memes_folder=os.getenv("REAL_REACTIONS_DIR", "/default/path")
 )
@@ -115,11 +115,11 @@ class MistralAgent:
 
         # Call function to caption
         if (extracted_dict["source"] == "reaction"):
-            image_bytes = await caption_template(urls["local_path"], extracted_dict["bottom"], \
+            image_bytes = await caption_template("./" + urls["local_path"], extracted_dict["bottom"], \
                 extracted_dict["top"], "png")
         else:
-             image_bytes = await caption_template(urls["templates"][0]["url"], extracted_dict["bottom"], \
-                extracted_dict["top"], "png")
+            image_bytes = await caption_template(urls["templates"][0]["url"], \
+                extracted_dict["bottom"], extracted_dict["top"], "png")
         
         output_path = f"{random.getrandbits(24)}.png"
         img = Image.open(io.BytesIO(image_bytes))
