@@ -90,6 +90,10 @@ async def on_message(message: discord.Message):
     logger.info(f"Processing message from {message.author}: {message.content}")
     response = await agent.run(message)
 
+    if response == "FAILURE":
+        await message.reply("Failed to make Mistral request. You may have run into a rate limit; please wait a moment before trying again")
+        return
+
     if response == "INSUFFICIENT_MESSAGE":
         # await message.reply(INSUFFICIENT_MESSAGE)
         return

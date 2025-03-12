@@ -82,10 +82,13 @@ class MistralAgent:
         
         logger.info(f"Messages are {messages}")
 
-        response = await self.client.chat.complete_async(
-            model=MISTRAL_MODEL,
-            messages=messages,
-        )
+        try:
+                response = await self.client.chat.complete_async(
+                    model=MISTRAL_MODEL,
+                    messages=messages,
+                )
+        except:
+                return "FAILURE"
         
         logger.info(f"Response is {response}")
         extracted_args = response.choices[0].message.content
