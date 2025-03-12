@@ -81,7 +81,7 @@ async def on_message(message: discord.Message):
         return
 
     # Ignore messages without the word "meme" to avoid hitting the Mistral rate limit
-    if "meme" not in message.content.lower() and "reaction" not in message.content.lower():
+    if "meme" not in message.content.lower() and "react" not in message.content.lower():
         return
 
     # Process the message with the agent you wrote
